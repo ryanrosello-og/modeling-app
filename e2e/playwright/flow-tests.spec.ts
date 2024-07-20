@@ -4034,7 +4034,6 @@ test.describe('Regression tests', () => {
     |> startProfileAt([0, 0], %)
     |> angledLine({ angle: 50, length: 45 }, %)
     |> yLineTo(0, %)
-    |> close(%)
 
     thing: "blah"`)
 
@@ -5995,7 +5994,7 @@ test.describe('Testing segment overlays', () => {
         await expect(page.locator('.cm-content')).toContainText(expectFinal)
       }
     test.setTimeout(120000)
-    test.only(
+    test(
       'for segments [line, angledLine, lineTo, xLineTo]',
       { tag: '@flaky' },
       async ({ page }, testInfo) => {
