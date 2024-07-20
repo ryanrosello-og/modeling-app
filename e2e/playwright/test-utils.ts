@@ -7,6 +7,7 @@ import { PNG } from 'pngjs'
 import { Protocol } from 'playwright-core/types/protocol'
 import type { Models } from '@kittycad/lib'
 import { APP_NAME } from 'lib/constants'
+import { MouseMovement } from './CursorControl'
 
 type TestColor = [number, number, number]
 export const TEST_COLORS = {
@@ -120,10 +121,15 @@ export const wiggleMove = async (
   const tau = Math.PI * 2
   const deg = tau / 360
   const step = dist / steps
+  let mouseMovements: MouseMovement[] = []
   for (let i = 0, j = 0; i < dist; i += step, j += 1) {
+    await page.waitForTimeout(250)
     if (locator) {
-      const isElVis = await page.locator(locator).isVisible()
-      if (isElVis) return
+      await page.locator(locator).waitFor({ timeout: 100 }).then(() => {
+        return mouseMovements
+      }).catch(() => {})
+      // const isElVis = await page.locator(locator).isVisible()
+      // if (isElVis) return mouseMovements
     }
     const [x1, y1] = [0, Math.sin((tau / steps) * j * freq) * amplitude]
     const [x2, y2] = [
@@ -132,7 +138,9 @@ export const wiggleMove = async (
     ]
     const [xr, yr] = [x2, y2]
     await page.mouse.move(x + xr, y + yr, { steps: 5 })
+    mouseMovements.push({ x: x + xr, y: y + yr, action: 'move' })
   }
+  return mouseMovements
 }
 
 export const circleMove = async (
