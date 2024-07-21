@@ -123,8 +123,6 @@ export const wiggleMove = async (
   const step = dist / steps
   let mouseMovements: MouseMovement[] = []
   for (let i = 0, j = 0; i < dist; i += step, j += 1) {
-    await page.waitForTimeout(250)
-
     if (locator) {
       const isElVis = await page.locator(locator).isVisible()
       if (isElVis) return
@@ -136,7 +134,6 @@ export const wiggleMove = async (
     ]
     const [xr, yr] = [x2, y2]
     await page.mouse.move(x + xr, y + yr, { steps: 5 })
-    console.log(x + xr, y + yr)
     mouseMovements.push({ x: x + xr, y: y + yr, action: 'move' })
   }
   // element was not visible, show the mouse movements in the screenshot
