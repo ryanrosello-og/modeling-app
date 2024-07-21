@@ -29,8 +29,6 @@ import { KCL_DEFAULT_LENGTH } from 'lib/constants'
 import { EngineCommand } from 'lang/std/engineConnection'
 import { onboardingPaths } from 'routes/Onboarding/paths'
 import { bracket } from 'lib/exampleKcl'
-import CursorControl from './CursorControl'
-
 const PERSIST_MODELING_CONTEXT = 'persistModelingContext'
 
 /*
@@ -5849,17 +5847,15 @@ test.describe('Testing segment overlays', () => {
         steps?: number
         locator?: string
       }) => {
-        const cursorControl = new CursorControl(page)
         await expect(page.getByText('Added variable')).not.toBeVisible()
-
-        await cursorControl.moveTo(0, 0)
+        await page.mouse.move(0, 0)
         await page.waitForTimeout(1000)
         let x = 0,
           y = 0
         x = hoverPos.x + Math.cos(ang * deg) * 32
         y = hoverPos.y - Math.sin(ang * deg) * 32
-        await cursorControl.moveTo(x, y)
-        const movements = await wiggleMove(
+        await page.mouse.move(x, y)
+        await wiggleMove(
           page,
           x,
           y,
@@ -5868,9 +5864,9 @@ test.describe('Testing segment overlays', () => {
           ang,
           10,
           5,
-          locator
+          locator,
+          testInfo,
         )
-        cursorControl.add(movements)
         await expect(page.locator('.cm-content')).toContainText(
           expectBeforeUnconstrained
         )
@@ -5879,11 +5875,7 @@ test.describe('Testing segment overlays', () => {
           `[data-constraint-type="${constraintType}"][data-is-constrained="true"]`
         )
 
-        try {
-          await expect(constrainedLocator).toBeVisible()
-        } catch (error) {
-          if (testInfo) await cursorControl.captureMouseMovements(testInfo)
-        }
+        await expect(constrainedLocator).toBeVisible()
         await constrainedLocator.hover({ timeout: 5_000 })
         await expect(
           await page.getByTestId('constraint-symbol-popover').count()
@@ -5923,7 +5915,7 @@ test.describe('Testing segment overlays', () => {
      * @param {number} options.steps - The number of steps to perform
      */
     const _clickUnconstrained =
-      (page: Page) =>
+      (page: Page, testInfo?: TestInfo) =>
       async ({
         hoverPos,
         constraintType,
@@ -5954,7 +5946,7 @@ test.describe('Testing segment overlays', () => {
         x = hoverPos.x + Math.cos(ang * deg) * 32
         y = hoverPos.y - Math.sin(ang * deg) * 32
         await page.mouse.move(x, y)
-        await wiggleMove(page, x, y, 20, 30, ang, 10, 5, locator)
+        await wiggleMove(page, x, y, 20, 30, ang, 10, 5, locator, testInfo)
 
         await expect(page.getByText('Added variable')).not.toBeVisible()
         await expect(page.locator('.cm-content')).toContainText(
